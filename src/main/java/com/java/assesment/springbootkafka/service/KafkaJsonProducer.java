@@ -8,6 +8,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import org.apache.kafka.common.errors.*;
 
 @Service
 public class KafkaJsonProducer {
@@ -24,7 +25,16 @@ public class KafkaJsonProducer {
                 .setHeader(KafkaHeaders.TOPIC, "kafkajsontopic")
                 .build();
         kafkaTemplate.send(message);
+        try {
+            kafkaTemplate.send(message);
+            logger.info("User message sent: {}", userData.toString());
 
-        logger.info("User message sent: {}", userData.toString());
+        } catch (TimeoutException e) {
+            logger.info("Timeout error occured while sending message to Kafka");
+        } catch (SerializationException e) {
+            logger.info("Serialization error occurred while sending message to Kafka");
+        }
+
+
     }
 }
